@@ -1,14 +1,10 @@
-import axios from 'axios'
-
+import axios from 'axios';
 
 class HttpService {
-
-    static send(request) {
-        //const axios = new Axios();
-        return axios(request);
-    }
+  static send(request) {
+    //const axios = new Axios();
+    return axios(request);
+  }
 }
 
-export {
-    HttpService
-}
+export { HttpService };

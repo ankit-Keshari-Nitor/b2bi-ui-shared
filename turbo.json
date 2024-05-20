@@ -17,8 +17,8 @@
       "cache": false,
       "persistent": true
     },
-    "publish": {
-      "dependsOn": ["build"]
+    "publish-pkg": {
+      "dependsOn": []
     }
   }
 }

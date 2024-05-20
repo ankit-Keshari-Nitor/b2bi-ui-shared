@@ -1,6 +1,6 @@
 {
   "name": "@b2bi/shell",
-  "version": "1.0.4",
+  "version": "1.0.13",
   "description": "React Shell for B2Bi Apps",
   "main": "es/index.js",
   "module": "es/index.js",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "node tasks/build.js",
     "build-dev": "webpack --mode development",
-    "publish": "yarn publish"
+    "publish-pkg": "yarn publish"
   },
   "dependencies": {},
   "peerDependencies": {
@@ -27,5 +27,8 @@
   },
   "publishConfig": {
     "registry": "https://artifactory.syncdi1.us.syncsort.com/artifactory/api/npm/b2bi-npm/"
-  }
+  },
+  "files": [
+    "es"
+  ]
 }

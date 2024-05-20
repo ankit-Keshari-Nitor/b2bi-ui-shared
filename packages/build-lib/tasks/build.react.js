@@ -1,54 +1,46 @@
-"use strict";
+'use strict';
 
-const { babel } = require("@rollup/plugin-babel");
-const commonjs = require("@rollup/plugin-commonjs");
-const { nodeResolve } = require("@rollup/plugin-node-resolve");
-const typescript = require("@rollup/plugin-typescript");
-const path = require("path");
-const { rollup } = require("rollup");
-const stripBanner = require("rollup-plugin-strip-banner");
-const { cwd } = require("node:process");
-const postcss = require("rollup-plugin-postcss");
-const styles = require("rollup-plugin-styles");
-const sass = require("rollup-plugin-sass");
+const { babel } = require('@rollup/plugin-babel');
+const commonjs = require('@rollup/plugin-commonjs');
+const { nodeResolve } = require('@rollup/plugin-node-resolve');
+const typescript = require('@rollup/plugin-typescript');
+const path = require('path');
+const { rollup } = require('rollup');
+const stripBanner = require('rollup-plugin-strip-banner');
+const { cwd } = require('node:process');
+const postcss = require('rollup-plugin-postcss');
+const styles = require('rollup-plugin-styles');
+const sass = require('rollup-plugin-sass');
 // const css = require("rollup-plugin-import-css");
 
 async function build(packageJson, watch) {
   console.log(cwd());
   const reactEntrypoint = {
-    filepath: path.resolve(cwd(), "src", "index.js"),
-    outputDirectory: path.resolve(cwd()),
+    filepath: path.resolve(cwd(), 'src', 'index.js'),
+    outputDirectory: path.resolve(cwd())
   };
 
   const formats = [
     {
-      type: "esm",
-      directory: "es",
+      type: 'esm',
+      directory: 'es',
       file: 'bundle.esm.js',
       exports: 'named',
-      sourcemap: true,
+      sourcemap: true
     },
     {
-      type: "commonjs",
-      directory: "lib",
+      type: 'commonjs',
+      directory: 'lib',
       file: 'bundle.js',
       exports: 'named',
-      sourcemap: true,
-    },
+      sourcemap: true
+    }
   ];
 
   for (const format of formats) {
-    const outputDirectory = path.join(
-      reactEntrypoint.outputDirectory,
-      format.directory
-    );
+    const outputDirectory = path.join(reactEntrypoint.outputDirectory, format.directory);
 
-    const reactInputConfig = getRollupConfig(
-      packageJson,
-      reactEntrypoint.filepath,
-      outputDirectory,
-      false
-    );
+    const reactInputConfig = getRollupConfig(packageJson, reactEntrypoint.filepath, outputDirectory, false);
     const reactBundle = await rollup(reactInputConfig);
     // const watcher = rollup.watch(reactInputConfig);
 
@@ -59,7 +51,7 @@ async function build(packageJson, watch) {
       preserveModules: true,
       preserveModulesRoot: path.dirname(reactEntrypoint.filepath),
       banner,
-      exports: "named",
+      exports: 'named'
     });
   }
 }
@@ -72,27 +64,27 @@ const banner = `/**
 // Base babel config for js and ts
 const babelConfig = {
   babelrc: false,
-  exclude: ["node_modules/**"],
+  exclude: ['node_modules/**'],
   presets: [
     [
-      "@babel/preset-env",
+      '@babel/preset-env',
       {
         modules: false,
         targets: {
-          browsers: ["extends browserslist-config-carbon"],
-        },
-      },
+          browsers: ['extends browserslist-config-carbon']
+        }
+      }
     ],
-    "@babel/preset-react",
+    '@babel/preset-react'
   ],
   plugins: [
-    "dev-expression",
-    "@babel/plugin-proposal-class-properties",
-    "@babel/plugin-proposal-export-namespace-from",
-    "@babel/plugin-proposal-export-default-from",
-    "@babel/plugin-transform-react-constant-elements",
+    'dev-expression',
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-proposal-export-namespace-from',
+    '@babel/plugin-proposal-export-default-from',
+    '@babel/plugin-transform-react-constant-elements'
   ],
-  babelHelpers: "bundled",
+  babelHelpers: 'bundled'
 };
 
 function getRollupConfig(packageJson, input, outDir, useTS) {
@@ -120,13 +112,27 @@ function getRollupConfig(packageJson, input, outDir, useTS) {
       postcss({
         use: [
           [
-            "sass",
+            'sass',
             {
-              includePaths: ["../../node_modules", path.resolve("node_modules")],
-            },
-          ],
-        ],
+              includePaths: ['../../node_modules', path.resolve('node_modules')]
+            }
+          ]
+        ]
       }),
+      {
+        name: 'Replace style-inject Rollup Plugin`', // it has to be after `postcss()`
+        generateBundle(options, bundle) {
+          const pattern = /["']([^"']*\/node_modules\/style-inject\/dist\/style-inject\.es\.js)["']/g;
+          const replacement = "'style-inject'";
+
+          for (const fileName of Object.keys(bundle)) {
+            const chunk = bundle[fileName];
+            if (chunk.type === 'chunk' && fileName.endsWith('.scss.js')) {
+              chunk.code = chunk.code.replace(pattern, replacement);
+            }
+          }
+        }
+      },
       /*styles({
         mode: "inject",
       }),
@@ -135,7 +141,7 @@ function getRollupConfig(packageJson, input, outDir, useTS) {
       }),
       css(),*/
       commonjs({
-        include: /node_modules/,
+        include: /node_modules/
       }),
       // Modify plugins for builds that require typescript
       ...(useTS ? getTSPlugins(outDir) : getPlugins()),
@@ -144,13 +150,13 @@ function getRollupConfig(packageJson, input, outDir, useTS) {
         transform(_code, id) {
           // Make sure to mark feature-flags.js as having side-effects to make
           // sure it gets included in the final bundle
-          if (id === path.join(__dirname, "..", "src", "feature-flags.js")) {
+          if (id === path.join(__dirname, '..', 'src', 'feature-flags.js')) {
             return {
-              moduleSideEffects: true,
+              moduleSideEffects: true
             };
           }
-        },
-      },
+        }
+      }
     ],
     watch: packageJson.rollup.watch
   };
@@ -168,16 +174,16 @@ function getTSPlugins(outDir) {
       noForceEmit: true,
       outputToFilesystem: false,
       compilerOptions: {
-        rootDir: "src",
+        rootDir: 'src',
         emitDeclarationOnly: true,
-        outDir,
-      },
+        outDir
+      }
     }),
     babel({
       ...babelConfig,
-      presets: [...babelConfig.presets, "@babel/preset-typescript"],
-      extensions: [".ts", ".tsx", ".js", ".jsx"],
-    }),
+      presets: [...babelConfig.presets, '@babel/preset-typescript'],
+      extensions: ['.ts', '.tsx', '.js', '.jsx']
+    })
   ];
 }
 

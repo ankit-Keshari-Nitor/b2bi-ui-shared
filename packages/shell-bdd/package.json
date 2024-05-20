@@ -14,7 +14,7 @@
       "test": "cucumber-js test --tags \"(not (@Ignore or @ignore))\" ",
       "test-current": "cucumber-js --tags \"(@current and (not (@Ignore or @ignore)))\" -f summary -f json:test/report/cucumber_report.json",
       "test-report": "node bdd/reporter.js",
-      "publish": "yarn publish"
+      "publish-pkg": "yarn publish"
     },
     "publishConfig": {
       "registry": "https://artifactory.syncdi1.us.syncsort.com/artifactory/api/npm/b2bi-npm/"

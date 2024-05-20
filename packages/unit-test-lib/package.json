@@ -12,7 +12,7 @@
     "@testing-library/user-event": "^14.4.3"
   },
   "scripts": {
-    "publish": "yarn publish"
+    "publish-pkg": "yarn publish"
   },
   "publishConfig": {
     "registry": "https://artifactory.syncdi1.us.syncsort.com/artifactory/api/npm/b2bi-npm/"
